@@ -140,6 +140,8 @@ function renderLocations() {
   } else if (locations.length > 0) {
     timerLocationSelect.value = locations[locations.length - 1].id;
   }
+
+  renderLocationOverview();
 }
 
 document.getElementById('addLocationBtn').addEventListener('click', () => {
@@ -314,7 +316,83 @@ function renderTimers() {
     listEl.appendChild(item);
   });
 
+  renderLocationOverview();
   tickTimers();
+}
+
+// ---------- 地點總覽 ----------
+const ORIGINAL_TITLE = document.title;
+
+function getStatusInfo(finish, now) {
+  const t5 = finish + RESPAWN_MIN_MS;
+  const t10 = finish + RESPAWN_MAX_MS;
+  if (now < finish) {
+    return { text: `⚔️ 戰鬥中，還剩 ${formatDuration(finish - now)}`, cls: 'battling', ready: false };
+  } else if (now < t5) {
+    return { text: `⏳ ${formatDuration(t5 - now)} 後可能重生`, cls: 'waiting', ready: false };
+  } else if (now < t10) {
+    return { text: `🍄 可能已重生（${formatDuration(t10 - now)} 內確定）`, cls: 'ready', ready: true };
+  } else {
+    return { text: '✅ 應已重生', cls: 'ready', ready: true };
+  }
+}
+
+function findLatestTimerForLocation(locationId) {
+  const timers = loadTimers().filter(t => t.locationId === locationId);
+  if (timers.length === 0) return null;
+  return timers.reduce((a, b) => (String(a.id) > String(b.id) ? a : b));
+}
+
+function renderLocationOverview() {
+  const overviewEl = document.getElementById('locationOverview');
+  const locations = loadLocations();
+
+  overviewEl.innerHTML = '';
+  if (locations.length === 0) {
+    overviewEl.innerHTML = '<p class="location-empty">先在上面新增地點，這裡就會顯示每個地點目前的狀態。</p>';
+    tickOverview();
+    return;
+  }
+
+  locations.forEach(loc => {
+    const timer = findLatestTimerForLocation(loc.id);
+    const row = document.createElement('div');
+    row.className = 'overview-row';
+    if (timer) row.dataset.finish = timer.finishTimeMs;
+
+    const label = document.createElement('span');
+    label.className = 'overview-label';
+    label.textContent = `📍 ${loc.name}`;
+
+    const status = document.createElement('span');
+    status.className = 'overview-status';
+    if (!timer) {
+      status.textContent = '尚無記錄';
+      status.classList.add('unknown');
+    }
+
+    row.appendChild(label);
+    row.appendChild(status);
+    overviewEl.appendChild(row);
+  });
+
+  tickOverview();
+}
+
+function tickOverview() {
+  const now = Date.now();
+  let readyCount = 0;
+
+  document.querySelectorAll('#locationOverview .overview-row').forEach(row => {
+    if (row.dataset.finish === undefined) return;
+    const info = getStatusInfo(Number(row.dataset.finish), now);
+    const status = row.querySelector('.overview-status');
+    status.textContent = info.text;
+    status.className = 'overview-status ' + info.cls;
+    if (info.ready) readyCount++;
+  });
+
+  document.title = readyCount > 0 ? `🍄(${readyCount}) ${ORIGINAL_TITLE}` : ORIGINAL_TITLE;
 }
 
 function checkNotifications() {
@@ -340,34 +418,21 @@ function tickTimers() {
   checkNotifications();
   document.querySelectorAll('.timer-item').forEach(item => {
     const finish = Number(item.dataset.finish);
-    const t5 = finish + RESPAWN_MIN_MS;
-    const t10 = finish + RESPAWN_MAX_MS;
     const countdown = item.querySelector('.timer-countdown');
+    const info = getStatusInfo(finish, now);
 
-    if (now < finish) {
-      countdown.textContent = `⚔️ 戰鬥中，還剩 ${formatDuration(finish - now)}`;
-      countdown.classList.remove('ready');
+    countdown.textContent = info.text;
+    countdown.classList.remove('ready', 'battling');
+    item.classList.remove('done', 'battling');
+    if (info.cls === 'battling') {
       countdown.classList.add('battling');
-      item.classList.remove('done');
       item.classList.add('battling');
-    } else if (now < t5) {
-      countdown.textContent = `⏳ ${formatDuration(t5 - now)} 後可能重生`;
-      countdown.classList.remove('ready', 'battling');
-      item.classList.remove('done', 'battling');
-    } else if (now < t10) {
-      countdown.textContent = `🍄 可能已重生（${formatDuration(t10 - now)} 內確定）`;
+    } else if (info.cls === 'ready') {
       countdown.classList.add('ready');
-      countdown.classList.remove('battling');
       item.classList.add('done');
-      item.classList.remove('battling');
-    } else {
-      countdown.textContent = '✅ 應已重生';
-      countdown.classList.add('ready');
-      countdown.classList.remove('battling');
-      item.classList.add('done');
-      item.classList.remove('battling');
     }
   });
+  tickOverview();
 }
 
 document.getElementById('justFinishedBtn').addEventListener('click', () => {
