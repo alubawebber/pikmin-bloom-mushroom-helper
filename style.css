@@ -113,6 +113,28 @@ main {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
+.peek-wrapper {
+  position: relative;
+}
+
+.peek-wrapper .card {
+  position: relative;
+  z-index: 1;
+}
+
+.pikmin-peek {
+  position: absolute;
+  top: -38px;
+  width: 42px;
+  height: 70px;
+  z-index: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
+}
+
+.pikmin-peek.peek-right { right: 22px; }
+.pikmin-peek.peek-left { left: 22px; }
+
 .card {
   background: var(--card-bg);
   border: 2px solid var(--border);
