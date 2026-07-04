@@ -201,6 +201,31 @@ main {
   margin-top: 12px;
 }
 
+.settings-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.settings-link-row span {
+  min-width: 56px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.settings-link-row code {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  flex: 1;
+  min-width: 200px;
+}
+
 .location-chip {
   display: flex;
   align-items: center;

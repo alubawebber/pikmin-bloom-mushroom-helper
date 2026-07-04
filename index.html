@@ -32,7 +32,31 @@
     <div class="card">
       <h2>🔔 瀏覽器提醒</h2>
       <p class="hint" id="notifyStatusText">尚未啟用瀏覽器通知。啟用後，蘑菇可能重生時會跳出系統通知，不用一直開著這頁盯著看。</p>
-      <button class="btn primary" id="enableNotifyBtn">🔔 啟用瀏覽器提醒</button>
+      <div class="time-choice">
+        <button class="btn primary" id="enableNotifyBtn">🔔 啟用瀏覽器提醒</button>
+        <button class="btn ghost" id="recheckNotifyBtn">🔄 重新檢查狀態</button>
+      </div>
+      <p class="hint" id="notifyHintAfterClick" style="display:none;">按下去後如果沒看到彈窗，看一下網址列最右邊，可能悄悄跳出一個小鈴鐺／通知圖示，點它選「允許」。</p>
+
+      <details class="manual-entry" id="notifyBlockedHelp" style="display:none;">
+        <summary>被封鎖了？手動到瀏覽器設定開啟</summary>
+        <p class="hint">瀏覽器不允許網頁直接跳轉到設定頁，請複製下面對應的網址，貼到網址列按 Enter，找到這個網站把通知改成「允許」。</p>
+        <div class="settings-link-row">
+          <span>Chrome</span>
+          <code>chrome://settings/content/notifications</code>
+          <button class="btn small" data-copy="chrome://settings/content/notifications">複製</button>
+        </div>
+        <div class="settings-link-row">
+          <span>Edge</span>
+          <code>edge://settings/content/notifications</code>
+          <button class="btn small" data-copy="edge://settings/content/notifications">複製</button>
+        </div>
+        <div class="settings-link-row">
+          <span>Firefox</span>
+          <code>about:preferences#privacy</code>
+          <button class="btn small" data-copy="about:preferences#privacy">複製</button>
+        </div>
+      </details>
     </div>
 
     <div class="card">

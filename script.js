@@ -157,27 +157,57 @@ document.getElementById('addLocationBtn').addEventListener('click', () => {
 // ---------- 瀏覽器通知 ----------
 const enableNotifyBtn = document.getElementById('enableNotifyBtn');
 const notifyStatusText = document.getElementById('notifyStatusText');
+const recheckNotifyBtn = document.getElementById('recheckNotifyBtn');
+const notifyHintAfterClick = document.getElementById('notifyHintAfterClick');
+const notifyBlockedHelp = document.getElementById('notifyBlockedHelp');
 
 function updateNotifyStatus() {
   if (!('Notification' in window)) {
     notifyStatusText.textContent = '這個瀏覽器不支援通知功能。';
     enableNotifyBtn.style.display = 'none';
+    notifyHintAfterClick.style.display = 'none';
+    notifyBlockedHelp.style.display = 'none';
     return;
   }
   if (Notification.permission === 'granted') {
     notifyStatusText.textContent = '✅ 瀏覽器提醒已啟用，蘑菇可能重生時會跳出通知。';
     enableNotifyBtn.style.display = 'none';
+    notifyHintAfterClick.style.display = 'none';
+    notifyBlockedHelp.style.display = 'none';
   } else if (Notification.permission === 'denied') {
-    notifyStatusText.textContent = '瀏覽器通知已被封鎖，請到瀏覽器設定手動開啟這個網站的通知權限。';
+    notifyStatusText.textContent = '瀏覽器通知已被封鎖，請用下面的方式手動開啟。';
     enableNotifyBtn.style.display = 'none';
+    notifyHintAfterClick.style.display = 'none';
+    notifyBlockedHelp.style.display = '';
   } else {
     notifyStatusText.textContent = '尚未啟用瀏覽器通知。啟用後，蘑菇可能重生時會跳出系統通知，不用一直開著這頁盯著看。';
     enableNotifyBtn.style.display = '';
+    notifyBlockedHelp.style.display = 'none';
   }
 }
 
 enableNotifyBtn.addEventListener('click', () => {
-  Notification.requestPermission().then(updateNotifyStatus);
+  notifyHintAfterClick.style.display = '';
+  Notification.requestPermission().then(result => {
+    updateNotifyStatus();
+    if (result === 'default') {
+      notifyStatusText.textContent = '沒有看到允許的話，通常是網址列悄悄跳出的小圖示被忽略了，或瀏覽器/擴充功能自動擋掉了。可以按下面「重新檢查狀態」，或直接用手動開啟的方式。';
+      notifyBlockedHelp.style.display = '';
+    }
+  });
+});
+
+recheckNotifyBtn.addEventListener('click', updateNotifyStatus);
+
+notifyBlockedHelp.querySelectorAll('[data-copy]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const text = btn.dataset.copy;
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.textContent;
+      btn.textContent = '已複製！';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    });
+  });
 });
 
 function notify(title, body) {
