@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pikmin Bloom 蘑菇助手｜蘑菇重生時間追蹤、種類克制查詢</title>
+<meta name="description" content="Pikmin Bloom（皮克敏 Bloom）蘑菇輔助工具：追蹤蘑菇重生倒數、記錄每日打菇與大聲公次數、查詢基礎色／屬性／活動（任務）蘑菇種類與皮克敏克制關係。">
+<meta name="keywords" content="Pikmin Bloom, 皮克敏, 蘑菇, 蘑菇重生時間, 打蘑菇攻略, 任務蘑菇, 活動蘑菇, 大聲公">
+<meta property="og:title" content="Pikmin Bloom 蘑菇助手">
+<meta property="og:description" content="追蹤 Pikmin Bloom 蘑菇重生倒數、種類克制查詢與每日打菇次數。">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>🍄 蘑菇助手 <span>Pikmin Bloom</span></h1>
+  <p class="subtitle">蘑菇重生時間追蹤 · 種類克制查詢</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="timer">⏱ 重生倒數</button>
+  <button class="tab-btn" data-tab="types">🎨 蘑菇種類</button>
+  <button class="tab-btn" data-tab="rules">📅 重置規則</button>
+</nav>
+
+<main>
+  <!-- ===================== 分頁 1：倒數計時器 ===================== -->
+  <section id="timer" class="tab-panel active">
+
+    <div class="card">
+      <h2>今日打菇次數</h2>
+      <div class="counter-row">
+        <div class="counter">
+          <span class="counter-value" id="battleCount">0</span>
+          <span class="counter-label">/ 3 次免費挑戰</span>
+        </div>
+        <button class="btn small" id="addBattleBtn">+1 次挑戰</button>
+        <button class="btn small ghost" id="resetBattleBtn">歸零</button>
+      </div>
+      <p class="hint">每日午夜（當地時間）自動重置。用完 3 次後仍可用「蘑菇加開券」繼續挑戰。</p>
+    </div>
+
+    <div class="card">
+      <h2>大聲公（免費邀請）次數</h2>
+      <div class="counter-row">
+        <div class="counter">
+          <span class="counter-value" id="bullhornCount">0</span>
+          <span class="counter-label" id="bullhornLimitLabel">/ 1 次（平日）</span>
+        </div>
+        <button class="btn small" id="addBullhornBtn">+1 次使用</button>
+        <button class="btn small ghost" id="resetBullhornBtn">歸零</button>
+      </div>
+      <p class="hint">平日每日 1 次免費，週六、週日每日 3 次免費（週末巨大活動蘑菇限定）。</p>
+    </div>
+
+    <div class="card">
+      <h2>新增蘑菇重生倒數</h2>
+      <div class="form-row">
+        <label>蘑菇種類</label>
+        <select id="mushroomColor">
+          <optgroup label="基礎色（任何皮克敏可打）">
+            <option value="red">🔴 紅蘑菇</option>
+            <option value="yellow">🟡 黃蘑菇</option>
+            <option value="blue">🔵 藍蘑菇</option>
+            <option value="purple">🟣 紫蘑菇</option>
+            <option value="white">⚪ 白蘑菇</option>
+            <option value="pink">🌸 粉蘑菇</option>
+            <option value="gray">⚫ 灰蘑菇</option>
+            <option value="ice">🧊 冰藍蘑菇</option>
+          </optgroup>
+          <optgroup label="屬性蘑菇（限定皮克敏種類）">
+            <option value="fire">🔥 火蘑菇（限紅皮克敏）</option>
+            <option value="water">💧 水蘑菇（限藍皮克敏）</option>
+            <option value="electric">⚡ 電蘑菇（限黃皮克敏）</option>
+            <option value="poison">☠️ 毒蘑菇（限白皮克敏）</option>
+            <option value="crystal">💎 水晶蘑菇（限岩石皮克敏）</option>
+          </optgroup>
+          <optgroup label="任務蘑菇（當月活動限定）">
+            <option value="event">🎉 活動蘑菇（本月任務素材）</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>尺寸</label>
+        <select id="mushroomSize">
+          <option value="small">小型（最少 1 隻）</option>
+          <option value="normal" selected>普通（最少 10 隻）</option>
+          <option value="large">大型（最少 15 隻）</option>
+          <option value="giant">巨大（最少 20 隻，週末限定）</option>
+        </select>
+      </div>
+      <button class="btn primary" id="justFinishedBtn">✅ 打完了！立即開始倒數</button>
+      <p class="hint">按下去會直接用「現在」當作完成時間開始倒數，不需要再多按一次。此網頁無法連線遊戲本身，仍需要你在打完的當下手動按一下。</p>
+
+      <div class="battle-entry">
+        <label>⚔️ 還在戰鬥中？輸入剩餘時間，時間到會自動轉入重生倒數</label>
+        <div class="time-choice">
+          <input type="number" id="battleHour" min="0" max="23" value="0" placeholder="時"> 時
+          <input type="number" id="battleMin" min="0" max="59" value="0" placeholder="分"> 分
+          <input type="number" id="battleSec" min="0" max="59" value="30" placeholder="秒"> 秒
+          <button class="btn" id="addBattleTimerBtn">⚔️ 加入戰鬥倒數</button>
+        </div>
+        <p class="hint">可重複新增多個蘑菇（例如同時打好幾隻），每個都會各自倒數，戰鬥結束後自動接續 5～10 分鐘重生倒數，不用再手動切換。</p>
+      </div>
+
+      <details class="manual-entry">
+        <summary>忘記馬上按？改用手動輸入時間補登</summary>
+        <div class="form-row">
+          <label>完成時間</label>
+          <input type="datetime-local" id="customTime">
+        </div>
+        <button class="btn" id="addTimerBtn">➕ 用指定時間新增倒數</button>
+      </details>
+
+      <p class="hint">同地點蘑菇約於打完後 <strong>5～10 分鐘</strong>原地重生，種類與尺寸會隨機變化，無法自行決定。</p>
+    </div>
+
+    <div class="card">
+      <h2>追蹤中的倒數</h2>
+      <div id="timerList" class="timer-list">
+        <p class="empty-msg" id="emptyMsg">目前沒有追蹤中的蘑菇，新增一個試試看！</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 分頁 2：蘑菇種類圖鑑 ===================== -->
+  <section id="types" class="tab-panel">
+    <div class="card">
+      <h2>基礎色蘑菇（8 種）</h2>
+      <p class="hint">任何顏色的皮克敏都能參加戰鬥，但派出同色皮克敏會有攻擊加成，且獲得的花蜜／花朵種子種類與蘑菇顏色相關。</p>
+      <div class="type-grid">
+        <div class="type-chip c-red">紅</div>
+        <div class="type-chip c-yellow">黃</div>
+        <div class="type-chip c-blue">藍</div>
+        <div class="type-chip c-purple">紫</div>
+        <div class="type-chip c-white">白</div>
+        <div class="type-chip c-pink">粉</div>
+        <div class="type-chip c-gray">灰</div>
+        <div class="type-chip c-ice">冰藍</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>屬性蘑菇（5 種，克制關係）</h2>
+      <p class="hint">屬性蘑菇有戰鬥限制，只能派出對應的皮克敏種類參戰，其餘種類無法上場。</p>
+      <table class="matchup-table">
+        <thead><tr><th>蘑菇屬性</th><th>限定皮克敏</th></tr></thead>
+        <tbody>
+          <tr><td>🔥 火蘑菇</td><td>紅皮克敏</td></tr>
+          <tr><td>💧 水蘑菇</td><td>藍皮克敏</td></tr>
+          <tr><td>⚡ 電蘑菇</td><td>黃皮克敏</td></tr>
+          <tr><td>☠️ 毒蘑菇</td><td>白皮克敏</td></tr>
+          <tr><td>💎 水晶蘑菇</td><td>岩石皮克敏</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>任務蘑菇（活動蘑菇）</h2>
+      <p class="hint">
+        官方稱為「活動蘑菇」，外觀會隨當月活動變化（例如萬聖節是橘底紫點、慶典活動是亮粉橘漸層＋花朵圖案），是取得<strong>當月任務素材／限定花瓣</strong>最主要且最穩定的來源。
+      </p>
+      <ul class="rule-list">
+        <li>優先打「活動蘑菇」，可獲得完成月任務（走路、種花、打蘑菇、摘花瓣、遠征等）所需的專屬素材。</li>
+        <li>週末的<strong>巨大活動蘑菇</strong>獎勵最豐富，一次可獲得大量素材（約 200 個道具）。</li>
+        <li>外觀每月／每檔活動更新，實際圖案請以遊戲內當月活動說明為準。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>尺寸與所需皮克敏數量</h2>
+      <table class="matchup-table">
+        <thead><tr><th>尺寸</th><th>最少派出隻數</th><th>特色</th></tr></thead>
+        <tbody>
+          <tr><td>小型</td><td>1 隻起</td><td>單人快速解決，獎勵較少</td></tr>
+          <tr><td>普通</td><td>10 隻起</td><td>最常見的蘑菇規模</td></tr>
+          <tr><td>大型</td><td>15 隻起</td><td>獎勵星級較高</td></tr>
+          <tr><td>巨大</td><td>20 隻起</td><td>通常只在週末活動出現，獎勵最豐富，適合多人／大聲公邀請</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== 分頁 3：重置規則 ===================== -->
+  <section id="rules" class="tab-panel">
+    <div class="card">
+      <h2>原地重生（打完之後）</h2>
+      <p>同一地點的蘑菇被打完後，約 <strong>5～10 分鐘</strong>會在原地自動長出新的蘑菇，種類與尺寸隨機，不需任何操作。</p>
+    </div>
+    <div class="card">
+      <h2>每日 / 每週重置</h2>
+      <ul class="rule-list">
+        <li><strong>每日午夜</strong>：尚未被挑戰的蘑菇會重置（可能換成新的種類）。</li>
+        <li><strong>週五 → 週六午夜</strong>：地圖上會更新出現「巨大活動蘑菇」，為週末限定。</li>
+        <li><strong>週日 → 週一午夜</strong>：週末尚未被挑戰的巨大蘑菇會一併重置回普通狀態。</li>
+        <li><strong>任務蘑菇（活動蘑菇）</strong>：外觀跟隨每月活動更新，平日以一般／大型尺寸隨機出現，週末才會出現巨大版；建議優先挑戰以取得當月任務素材。</li>
+        <li><strong>打菇次數</strong>：每人每日 3 次免費挑戰機會，午夜重置，可用「蘑菇加開券」增加次數。</li>
+        <li><strong>大聲公</strong>：平日每日 1 次免費，週六、週日每日 3 次免費；可遠端邀請最多 10 位好友加入戰鬥，若名額已滿 5 人，受邀者需使用蘑菇券才能加入。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>資料來源</h2>
+      <p class="hint">
+        資料整理自
+        <a href="https://niantic.helpshift.com/hc/zh-hant/23-pikmin-bloom/faq/3039-mushrooms-1676271507/" target="_blank" rel="noopener">Pikmin Bloom 官方說明中心</a>、
+        <a href="https://www.pikminwiki.com/Mushroom_battle" target="_blank" rel="noopener">Pikipedia</a>、
+        <a href="https://www.shinygoods.tw/pikmin-bloom-mushroom-guide-2026" target="_blank" rel="noopener">shinygoods.tw 打菇攻略</a> 及玩家社群討論，遊戲機制可能隨版本更新調整，實際請以遊戲內顯示為準。
+      </p>
+    </div>
+  </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
