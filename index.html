@@ -30,6 +30,22 @@
   <section id="timer" class="tab-panel active">
 
     <div class="card">
+      <h2>🔔 瀏覽器提醒</h2>
+      <p class="hint" id="notifyStatusText">尚未啟用瀏覽器通知。啟用後，蘑菇可能重生時會跳出系統通知，不用一直開著這頁盯著看。</p>
+      <button class="btn primary" id="enableNotifyBtn">🔔 啟用瀏覽器提醒</button>
+    </div>
+
+    <div class="card">
+      <h2>📍 常駐地點</h2>
+      <p class="hint">辦公室、住家附近固定會打的蘑菇點位，先取名字存起來，之後新增倒數直接選，不用每次重填。</p>
+      <div class="time-choice">
+        <input type="text" id="newLocationName" placeholder="例如：公司大門口">
+        <button class="btn" id="addLocationBtn">➕ 新增地點</button>
+      </div>
+      <div id="locationChips" class="location-chips"></div>
+    </div>
+
+    <div class="card">
       <h2>今日打菇次數</h2>
       <div class="counter-row">
         <div class="counter">
@@ -57,6 +73,12 @@
 
     <div class="card">
       <h2>新增蘑菇重生倒數</h2>
+      <div class="form-row">
+        <label>地點</label>
+        <select id="timerLocation">
+          <option value="">（未指定地點）</option>
+        </select>
+      </div>
       <div class="form-row">
         <label>蘑菇種類</label>
         <select id="mushroomColor">

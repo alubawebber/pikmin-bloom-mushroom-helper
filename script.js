@@ -92,6 +92,100 @@ document.getElementById('resetBullhornBtn').addEventListener('click', () => {
   renderBullhornCount();
 });
 
+// ---------- 常駐地點 ----------
+const LOCATIONS_KEY = 'pikminMushroom_locations';
+const locationChipsEl = document.getElementById('locationChips');
+const timerLocationSelect = document.getElementById('timerLocation');
+
+function loadLocations() {
+  return JSON.parse(localStorage.getItem(LOCATIONS_KEY) || '[]');
+}
+
+function saveLocations(locations) {
+  localStorage.setItem(LOCATIONS_KEY, JSON.stringify(locations));
+}
+
+function renderLocations() {
+  const locations = loadLocations();
+
+  locationChipsEl.innerHTML = '';
+  if (locations.length === 0) {
+    locationChipsEl.innerHTML = '<span class="location-empty">尚未新增任何地點</span>';
+  } else {
+    locations.forEach(loc => {
+      const chip = document.createElement('span');
+      chip.className = 'location-chip';
+      chip.append(`📍 ${loc.name} `);
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '✕';
+      delBtn.addEventListener('click', () => {
+        saveLocations(loadLocations().filter(l => l.id !== loc.id));
+        renderLocations();
+      });
+      chip.appendChild(delBtn);
+      locationChipsEl.appendChild(chip);
+    });
+  }
+
+  const currentValue = timerLocationSelect.value;
+  timerLocationSelect.innerHTML = '<option value="">（未指定地點）</option>';
+  locations.forEach(loc => {
+    const opt = document.createElement('option');
+    opt.value = loc.id;
+    opt.textContent = `📍 ${loc.name}`;
+    timerLocationSelect.appendChild(opt);
+  });
+  if (locations.some(l => l.id === currentValue)) {
+    timerLocationSelect.value = currentValue;
+  } else if (locations.length > 0) {
+    timerLocationSelect.value = locations[locations.length - 1].id;
+  }
+}
+
+document.getElementById('addLocationBtn').addEventListener('click', () => {
+  const input = document.getElementById('newLocationName');
+  const name = input.value.trim();
+  if (!name) return;
+
+  const locations = loadLocations();
+  locations.push({ id: Date.now() + Math.random().toString(16).slice(2), name });
+  saveLocations(locations);
+  input.value = '';
+  renderLocations();
+});
+
+// ---------- 瀏覽器通知 ----------
+const enableNotifyBtn = document.getElementById('enableNotifyBtn');
+const notifyStatusText = document.getElementById('notifyStatusText');
+
+function updateNotifyStatus() {
+  if (!('Notification' in window)) {
+    notifyStatusText.textContent = '這個瀏覽器不支援通知功能。';
+    enableNotifyBtn.style.display = 'none';
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    notifyStatusText.textContent = '✅ 瀏覽器提醒已啟用，蘑菇可能重生時會跳出通知。';
+    enableNotifyBtn.style.display = 'none';
+  } else if (Notification.permission === 'denied') {
+    notifyStatusText.textContent = '瀏覽器通知已被封鎖，請到瀏覽器設定手動開啟這個網站的通知權限。';
+    enableNotifyBtn.style.display = 'none';
+  } else {
+    notifyStatusText.textContent = '尚未啟用瀏覽器通知。啟用後，蘑菇可能重生時會跳出系統通知，不用一直開著這頁盯著看。';
+    enableNotifyBtn.style.display = '';
+  }
+}
+
+enableNotifyBtn.addEventListener('click', () => {
+  Notification.requestPermission().then(updateNotifyStatus);
+});
+
+function notify(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body });
+  }
+}
+
 // ---------- 蘑菇重生倒數 ----------
 const TIMERS_KEY = 'pikminMushroom_timers';
 
@@ -118,11 +212,15 @@ function saveTimers(timers) {
   localStorage.setItem(TIMERS_KEY, JSON.stringify(timers));
 }
 
-function addTimer(color, size, finishTimeMs) {
+function addTimer(color, size, finishTimeMs, locationId) {
   const timers = loadTimers();
+  const location = loadLocations().find(l => l.id === locationId);
   timers.push({
     id: Date.now() + Math.random().toString(16).slice(2),
-    color, size, finishTimeMs
+    color, size, finishTimeMs,
+    locationId: locationId || null,
+    locationName: location ? location.name : null,
+    notified5: false
   });
   saveTimers(timers);
   renderTimers();
@@ -164,8 +262,13 @@ function renderTimers() {
 
     const info = document.createElement('div');
     info.className = 'timer-info';
-    info.innerHTML = `<span class="timer-title">${COLOR_LABELS[t.color]} · ${SIZE_LABELS[t.size]}</span>
-      <span class="timer-sub">完成時間：${new Date(t.finishTimeMs).toLocaleString('zh-TW', { hour12: false })}</span>`;
+    const locationLabel = t.locationName ? `📍 ${t.locationName}` : null;
+    const colorSizeLabel = `${COLOR_LABELS[t.color]} · ${SIZE_LABELS[t.size]}`;
+    const subParts = [];
+    if (locationLabel) subParts.push(colorSizeLabel);
+    subParts.push(`完成時間：${new Date(t.finishTimeMs).toLocaleString('zh-TW', { hour12: false })}`);
+    info.innerHTML = `<span class="timer-title">${locationLabel || colorSizeLabel}</span>
+      <span class="timer-sub">${subParts.join(' ・ ')}</span>`;
 
     const countdown = document.createElement('div');
     countdown.className = 'timer-countdown';
@@ -184,8 +287,27 @@ function renderTimers() {
   tickTimers();
 }
 
+function checkNotifications() {
+  const now = Date.now();
+  const timers = loadTimers();
+  let changed = false;
+
+  timers.forEach(t => {
+    const t5 = t.finishTimeMs + RESPAWN_MIN_MS;
+    if (!t.notified5 && now >= t5) {
+      const label = t.locationName ? `📍 ${t.locationName}` : `${COLOR_LABELS[t.color]} · ${SIZE_LABELS[t.size]}`;
+      notify('🍄 蘑菇可能重生了', `${label} 可能已經重生，去看看吧！`);
+      t.notified5 = true;
+      changed = true;
+    }
+  });
+
+  if (changed) saveTimers(timers);
+}
+
 function tickTimers() {
   const now = Date.now();
+  checkNotifications();
   document.querySelectorAll('.timer-item').forEach(item => {
     const finish = Number(item.dataset.finish);
     const t5 = finish + RESPAWN_MIN_MS;
@@ -221,37 +343,42 @@ function tickTimers() {
 document.getElementById('justFinishedBtn').addEventListener('click', () => {
   const color = document.getElementById('mushroomColor').value;
   const size = document.getElementById('mushroomSize').value;
-  addTimer(color, size, Date.now());
+  const locationId = timerLocationSelect.value;
+  addTimer(color, size, Date.now(), locationId);
 });
 
 document.getElementById('addBattleTimerBtn').addEventListener('click', () => {
   const color = document.getElementById('mushroomColor').value;
   const size = document.getElementById('mushroomSize').value;
+  const locationId = timerLocationSelect.value;
   const hour = Math.max(0, parseInt(document.getElementById('battleHour').value, 10) || 0);
   const min = Math.max(0, parseInt(document.getElementById('battleMin').value, 10) || 0);
   const sec = Math.max(0, parseInt(document.getElementById('battleSec').value, 10) || 0);
   const remainingMs = (hour * 3600 + min * 60 + sec) * 1000;
   if (remainingMs <= 0) return;
 
-  addTimer(color, size, Date.now() + remainingMs);
+  addTimer(color, size, Date.now() + remainingMs, locationId);
 });
 
 document.getElementById('addTimerBtn').addEventListener('click', () => {
   const color = document.getElementById('mushroomColor').value;
   const size = document.getElementById('mushroomSize').value;
+  const locationId = timerLocationSelect.value;
   const customTime = document.getElementById('customTime').value;
 
   if (!customTime) return;
   const finishTimeMs = new Date(customTime).getTime();
   if (isNaN(finishTimeMs)) return;
 
-  addTimer(color, size, finishTimeMs);
+  addTimer(color, size, finishTimeMs, locationId);
   document.getElementById('customTime').value = '';
 });
 
 // ---------- 初始化 ----------
 renderBattleCount();
 renderBullhornCount();
+renderLocations();
+updateNotifyStatus();
 renderTimers();
 
 setInterval(() => {

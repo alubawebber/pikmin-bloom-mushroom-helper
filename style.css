@@ -194,6 +194,42 @@ main {
   text-align: center;
 }
 
+.location-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.location-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #eefbf0;
+  border: 1px solid var(--green);
+  color: var(--green-dark);
+  border-radius: 999px;
+  padding: 6px 8px 6px 14px;
+  font-size: 0.85rem;
+}
+
+.location-chip button {
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.location-chip button:hover { color: var(--danger); }
+
+.location-empty {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
 .btn.small {
   padding: 6px 10px;
   font-size: 0.8rem;
