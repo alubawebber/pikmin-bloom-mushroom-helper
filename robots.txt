@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://alubawebber.github.io/pikmin-bloom-mushroom-helper/sitemap.xml
