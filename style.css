@@ -17,6 +17,10 @@
 
 * { box-sizing: border-box; }
 
+h1, h2, h3, h4, h5, h6, button, input, select {
+  font-weight: 400;
+}
+
 body {
   margin: 0;
   font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -44,6 +48,7 @@ body {
 .app-header h1 {
   margin: 0;
   font-size: 1.75rem;
+  font-weight: 400;
   font-family: "ZCOOL KuaiLe", "Microsoft JhengHei", sans-serif;
   letter-spacing: 1px;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
@@ -97,7 +102,7 @@ body {
   color: var(--green-dark);
   background: white;
   border-color: var(--border);
-  font-weight: 700;
+  font-weight: 400;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
 }
 
@@ -123,6 +128,7 @@ main {
 .card h2 {
   margin: 0 0 10px;
   font-size: 1.1rem;
+  font-weight: 400;
   color: var(--green-dark);
   font-family: "ZCOOL KuaiLe", "Microsoft JhengHei", sans-serif;
   letter-spacing: 0.5px;
@@ -150,7 +156,7 @@ main {
 
 .counter-value {
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--green-dark);
   font-family: "ZCOOL KuaiLe", sans-serif;
 }
@@ -168,7 +174,7 @@ main {
   border-radius: 999px;
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
 }
@@ -189,7 +195,7 @@ main {
   border-color: var(--green-dark);
   width: 100%;
   padding: 13px;
-  font-weight: 700;
+  font-weight: 400;
   font-size: 0.98rem;
   margin-top: 4px;
   box-shadow: 0 4px 0 var(--green-dark);
@@ -211,7 +217,7 @@ main {
   cursor: pointer;
   font-size: 0.82rem;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .manual-entry .form-row {
@@ -229,7 +235,7 @@ main {
   font-size: 0.85rem;
   color: var(--muted);
   margin-bottom: 8px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .battle-entry .time-choice {
@@ -272,7 +278,7 @@ main {
 }
 
 .overview-label {
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .overview-status {
@@ -284,9 +290,9 @@ main {
   background: white;
 }
 
-.overview-status.battling { color: #a8650a; background: #fff1d6; font-weight: 700; }
+.overview-status.battling { color: #a8650a; background: #fff1d6; font-weight: 400; }
 .overview-status.waiting { color: var(--green-dark); background: #e8f9ee; }
-.overview-status.ready { color: #d84545; background: #ffe3e3; font-weight: 700; }
+.overview-status.ready { color: #d84545; background: #ffe3e3; font-weight: 400; }
 .overview-status.unknown { color: var(--muted); font-style: italic; background: transparent; }
 
 .settings-link-row {
@@ -301,7 +307,7 @@ main {
 .settings-link-row span {
   min-width: 56px;
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .settings-link-row code {
@@ -324,7 +330,7 @@ main {
   border-radius: 999px;
   padding: 6px 8px 6px 14px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .location-chip button {
@@ -366,7 +372,7 @@ main {
   font-size: 0.85rem;
   color: var(--muted);
   margin-bottom: 5px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .form-row select,
@@ -424,12 +430,12 @@ main {
 }
 
 .timer-info { display: flex; flex-direction: column; gap: 2px; }
-.timer-title { font-weight: 700; font-size: 0.94rem; }
+.timer-title { font-weight: 400; font-size: 0.94rem; }
 .timer-sub { font-size: 0.75rem; color: var(--muted); }
 
 .timer-countdown {
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  font-weight: 400;
   font-size: 1rem;
   color: var(--green-dark);
   white-space: nowrap;
@@ -458,7 +464,7 @@ main {
   border-radius: 14px;
   padding: 16px 4px;
   text-align: center;
-  font-weight: 700;
+  font-weight: 400;
   font-size: 0.85rem;
   color: white;
   text-shadow: 0 1px 1px rgba(0,0,0,0.25);
@@ -488,7 +494,7 @@ main {
 
 .matchup-table th {
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .rule-list {
