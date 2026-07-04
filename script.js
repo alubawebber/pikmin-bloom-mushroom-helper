@@ -230,7 +230,7 @@ const COLOR_LABELS = {
 };
 
 const SIZE_LABELS = {
-  small: '小型', normal: '普通', large: '大型', giant: '巨大'
+  small: '小型', normal: '一般', large: '大型', giant: '超巨大'
 };
 
 const RESPAWN_MIN_MS = 5 * 60 * 1000;
