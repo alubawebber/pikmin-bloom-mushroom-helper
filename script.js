@@ -172,7 +172,7 @@ function updateNotifyStatus() {
     return;
   }
   if (Notification.permission === 'granted') {
-    notifyStatusText.textContent = '✅ 瀏覽器提醒已啟用，蘑菇可能重生時會跳出通知。';
+    notifyStatusText.textContent = '✅ 瀏覽器提醒已啟用，蘑菇重生前約 1 分鐘會提早跳出通知。';
     enableNotifyBtn.style.display = 'none';
     notifyHintAfterClick.style.display = 'none';
     notifyBlockedHelp.style.display = 'none';
@@ -182,7 +182,7 @@ function updateNotifyStatus() {
     notifyHintAfterClick.style.display = 'none';
     notifyBlockedHelp.style.display = '';
   } else {
-    notifyStatusText.textContent = '尚未啟用瀏覽器通知。啟用後，蘑菇可能重生時會跳出系統通知，不用一直開著這頁盯著看。';
+    notifyStatusText.textContent = '尚未啟用瀏覽器通知。啟用後，蘑菇重生前約 1 分鐘會提早跳出系統通知，讓你先卡位，不用等到重生後才發現搶輸了。';
     enableNotifyBtn.style.display = '';
     notifyBlockedHelp.style.display = 'none';
   }
@@ -252,7 +252,7 @@ function addTimer(color, size, finishTimeMs, locationId) {
     color, size, finishTimeMs,
     locationId: locationId || null,
     locationName: location ? location.name : null,
-    notified5: false
+    notifiedPre: false
   });
   saveTimers(timers);
   renderTimers();
@@ -395,17 +395,19 @@ function tickOverview() {
   document.title = readyCount > 0 ? `🍄(${readyCount}) ${ORIGINAL_TITLE}` : ORIGINAL_TITLE;
 }
 
+const NOTIFY_LEAD_MS = 60 * 1000; // 提前 1 分鐘通知，搶在重生前先卡位
+
 function checkNotifications() {
   const now = Date.now();
   const timers = loadTimers();
   let changed = false;
 
   timers.forEach(t => {
-    const t5 = t.finishTimeMs + RESPAWN_MIN_MS;
-    if (!t.notified5 && now >= t5) {
+    const alertTime = t.finishTimeMs + RESPAWN_MIN_MS - NOTIFY_LEAD_MS;
+    if (!t.notifiedPre && now >= alertTime) {
       const label = t.locationName ? `📍 ${t.locationName}` : `${COLOR_LABELS[t.color]} · ${SIZE_LABELS[t.size]}`;
-      notify('🍄 蘑菇可能重生了', `${label} 可能已經重生，去看看吧！`);
-      t.notified5 = true;
+      notify('🍄 蘑菇快重生了', `${label} 大約 1 分鐘後可能重生，先卡位準備！`);
+      t.notifiedPre = true;
       changed = true;
     }
   });
